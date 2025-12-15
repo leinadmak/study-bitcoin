@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Bitcoin Landing</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  font-family:'Orbitron', sans-serif;
+  background:#0f0f0f;
+  color:#00ff00;
+  height:100vh;
+  overflow:hidden;
+}
+
+#matrixCanvas {
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+}
+
+#btcLogo {
+  position:fixed;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  width:500px;
+  height:500px;
+  opacity:0.15;
+  cursor:pointer;
+  z-index:3;
+}
+
+.content {
+  position:relative;
+  z-index:2;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.study {
+  margin-top:120px;
+  font-size:84px;
+  letter-spacing:6px;
+  text-shadow:0 0 14px #00ff00,0 0 28px #00ff00;
+}
+
+.bottom-text {
+  position:fixed;
+  left:20px;
+  top:20px;
+  font-size:14px;
+  letter-spacing:2px;
+  text-shadow:0 0 10px #00ff00;
+  cursor:pointer;
+}
+
+#donateBox {
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  background:rgba(15,15,15,0.85);
+  padding:12px 18px;
+  border-radius:10px;
+  box-shadow:0 0 12px #00ff00,0 0 24px #00ff00;
+  z-index:4;
+}
+
+#donateText {
+  text-align:right;
+  font-size:11px;
+  line-height:1.6;
+  max-width:360px;
+  white-space:nowrap;
+}
+
+#donateText .title {
+  font-size:13px;
+  margin-bottom:6px;
+  font-weight:700;
+}
+
+#btcAddress {
+  cursor:pointer;
+}
+
+#btcAddress:hover {
+  color:#66ff66;
+  text-shadow:0 0 8px #00ff00;
+}
+
+#qrcode {
+  background:#fff;
+  padding:8px;
+  border-radius:8px;
+}
+
+#toast {
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  background: rgba(0,255,0,0.9);
+  color: #0f0f0f;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 30;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+}
+
+/* =========================
+   RESPONSIVE (SAFE PATCH)
+   ========================= */
+@media (max-width: 900px) {
+
+  .study {
+    font-size:56px;
+    letter-spacing:4px;
+    text-align:center;
+    padding:0 10px;
+  }
+
+  #btcLogo {
+    width:300px;
+    height:300px;
+    opacity:0.12;
+  }
+
+  #donateBox {
+    right:10px;
+    left:10px;
+    bottom:10px;
+    max-width:calc(100% - 20px);
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+
+  #donateText {
+    white-space:normal;
+    text-align:center;
+    max-width:100%;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .study {
+    font-size:42px;
+    letter-spacing:2px;
+  }
+
+  #btcLogo {
+    width:220px;
+    height:220px;
+  }
+
+  .bottom-text {
+    font-size:11px;
+    letter-spacing:1px;
+  }
+
+  #donateBox {
+    gap:10px;
+    padding:10px;
+  }
+
+  #qrcode {
+    transform:scale(0.85);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="matrixCanvas"></canvas>
+
+<img id="btcLogo"
+     src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg"
+     alt="Bitcoin">
+
+<div class="content">
+  <div class="study">STUDY ₿ITCOIN</div>
+  <div class="bottom-text">FOLLOW THE WHITE RABBIT</div>
+</div>
+
+<div id="donateBox">
+  <div id="donateText">
+    <div class="title">DONATE ME</div>
+    <span id="btcAddress">1F9crt8yo9ns8GiwfqGqhjnGxnf4QiQo5E</span>
+  </div>
+  <div id="qrcode"></div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+
+<script>
+/* Matrix Background */
+const canvas = document.getElementById("matrixCanvas");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas(){
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+}
+resizeCanvas();
+addEventListener('resize', resizeCanvas);
+
+const fontSize = 16;
+let columns = Math.floor(canvas.width / fontSize);
+let drops = Array.from({length: columns}).fill(1);
+
+function drawMatrix(){
+  ctx.fillStyle="rgba(0,0,0,0.05)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#00ff00";
+  ctx.font=fontSize+"px monospace";
+
+  drops.forEach((y,i)=>{
+    const r=Math.random()*100;
+    const t = r<45 ? "0" : r<90 ? "1" : "₿";
+    ctx.fillText(t,i*fontSize,y*fontSize);
+    if(y*fontSize>canvas.height && Math.random()>0.975) drops[i]=0;
+    drops[i]++;
+  });
+}
+setInterval(drawMatrix,50);
+
+/* QR Code */
+const btcAddress = "1F9crt8yo9ns8GiwfqGqhjnGxnf4QiQo5E";
+new QRCode(document.getElementById("qrcode"), {
+  text:`bitcoin:${btcAddress}`,
+  width:92,
+  height:92,
+  colorDark:"#000000",
+  colorLight:"#ffffff",
+  correctLevel:QRCode.CorrectLevel.H
+});
+
+/* Toast */
+function showToast(message){
+  const toast=document.getElementById("toast");
+  toast.innerText=message;
+  toast.style.opacity=1;
+  setTimeout(()=>toast.style.opacity=0,3000);
+}
+
+/* Copy BTC */
+document.getElementById("btcAddress").addEventListener("click",()=>{
+  navigator.clipboard.writeText(btcAddress)
+    .then(()=>showToast("Copied!"))
+    .catch(()=>showToast("Copy manually"));
+});
+
+/* BTC Logo Easter Egg */
+document.getElementById("btcLogo").addEventListener("click",()=>{
+  showToast("The Times 03/Jan/2009\nChancellor on brink of second bailout for banks");
+});
+
+/* Rabbit Easter Egg */
+let clicks=0, timer;
+document.querySelector('.bottom-text').addEventListener('click',()=>{
+  clicks++;
+  clearTimeout(timer);
+  timer=setTimeout(()=>clicks=0,400);
+  if(clicks===3){
+    window.open('simulator.html','_blank');
+    clicks=0;
+  }
+});
+</script>
+
+</body>
+</html>
