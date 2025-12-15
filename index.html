@@ -120,7 +120,7 @@ body {
 }
 
 /* =========================
-   RESPONSIVE (SAFE PATCH)
+   RESPONSIVE
    ========================= */
 @media (max-width: 900px) {
 
@@ -270,17 +270,21 @@ document.getElementById("btcLogo").addEventListener("click",()=>{
   showToast("The Times 03/Jan/2009\nChancellor on brink of second bailout for banks");
 });
 
-/* Rabbit Easter Egg */
-let clicks=0, timer;
-document.querySelector('.bottom-text').addEventListener('click',()=>{
-  clicks++;
-  clearTimeout(timer);
-  timer=setTimeout(()=>clicks=0,400);
-  if(clicks===3){
-    window.open('simulator.html','_blank');
-    clicks=0;
-  }
-});
+/* Rabbit Easter Egg - działa od razu na desktop i mobilkach */
+const rabbit = document.querySelector('.bottom-text');
+
+function openEasterEgg(){
+    if(/Mobi|Android/i.test(navigator.userAgent)){
+        // Mobilka: redirect
+        window.location.href = 'simulator.html';
+    } else {
+        // Desktop: nowa karta
+        window.open('simulator.html', '_blank');
+    }
+}
+
+rabbit.addEventListener('click', openEasterEgg);
+rabbit.addEventListener('touchstart', openEasterEgg);
 </script>
 
 </body>
